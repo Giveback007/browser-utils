@@ -1,0 +1,29 @@
+{
+  "name": "@giveback007/browser-utils",
+  "version": "0.0.1",
+  "description": "Small browser util function library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "publish-script": "del dist /s /f /q && npm run lint && npm run build && npm publish",
+    "build": "tsc",
+    "lint": "tslint 'src/**/*.{ts,tsx}'"
+  },
+  "files": [
+    "/dist",
+    "/src"
+  ],
+  "author": "Dovydas Stirpeika <dovy91@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "@giveback007/util-lib": "^0.19.3",
+    "react": "^17.0.1",
+    "tslib": "~2.0.3"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.1.2"
+  }
+}

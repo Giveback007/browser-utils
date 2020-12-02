@@ -1,0 +1,47 @@
+// Good setup explanations:
+// https://www.typescriptlang.org/docs/handbook/react-&-webpack.html
+// https://blog.angularindepth.com/configuring-typescript-compiler-a84ed8f87e3
+// http://www.westerndevs.com/javascript/How-to-Compile-TypeScript-into-a-Single-File-with-SystemJS-Modules-with-Gulp/
+{
+  "include": ["src", "types"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    
+    /* Basic Options */
+    "target": "ES6",
+    "module": "ES6",
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "lib": ["es2017", "dom"],
+    "rootDir": "./src",
+    "outDir": "dist/",
+    "declaration": true,
+    "jsx": "preserve",
+
+    /* Additional Options */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "importsNotUsedAsValues": "error",
+    "pretty": true,
+    "sourceMap": true,
+
+    /* -- Strict Type-Checking Options -- */
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    // "noStrictGenericChecks": true,    
+
+    /* -- Additional Checks -- */
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+  },
+}
+
