@@ -13,8 +13,17 @@
     "/dist",
     "/src"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Giveback007/browser-utils.git"
+  },
+  "keywords": [],
   "author": "Dovydas Stirpeika <dovy91@gmail.com>",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Giveback007/browser-utils/issues"
+  },
+  "homepage": "https://github.com/Giveback007/browser-utils#readme",
   "dependencies": {
     "@giveback007/util-lib": "^0.19.3",
     "react": "^17.0.1",
