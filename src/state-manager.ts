@@ -93,10 +93,12 @@ export class StateManager<State, Key extends keyof State = keyof State>
   }
 
   /** Will execute the given function on state change */
-  subscribe = (funct: (s: State, prev: State) => any) =>
+  subscribe = (funct: (s: State, prev: State) => any, fireOnInitSub = false) =>
   {
     const id = uiid();
     this.subscriptions[id] = funct;
+
+    if (fireOnInitSub) funct(this.emittedState, this.emittedState);
 
     return {
       unsubscribe: () => delete this.subscriptions[id]
@@ -105,7 +107,9 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
   /** Subscribe only to specific key(s) changes in state */
   subToKeys = <K extends Key = Key>(
-    keys: K[] | K, funct: (s: State, prev: State) => any
+    keys: K[] | K,
+    funct: (s: State, prev: State) => any,
+    fireOnInitSub = false
   ) => {
     if (isType(keys, 'array') && keys.length === 1) keys = keys[0];
 
@@ -125,6 +129,8 @@ export class StateManager<State, Key extends keyof State = keyof State>
     }
 
     this.subscriptions[id] = f;
+
+    if (fireOnInitSub) funct(this.emittedState, this.emittedState);
 
     return { unsubscribe: () => delete this.subscriptions[id] };
   }
