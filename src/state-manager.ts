@@ -13,7 +13,8 @@ export class StateManager<State, Key extends keyof State = keyof State>
    * emittedState is used to check if an emit is
    * necessary it is not the same as prevState.
    */
-  private emittedState: State = {} as State;
+  private emittedState: State = undefined as any;
+  private emittedState2: State = undefined as any;
   private state: State = {} as State;
 
   private readonly useLS:
@@ -33,10 +34,10 @@ export class StateManager<State, Key extends keyof State = keyof State>
     useLocalStorage?: lsOptions<Key>
   )
   {
-    let state = { } as State;
+      let state = { } as State;
 
-    if (useLocalStorage) {
-      const { useKeys, ignoreKeys, id } = useLocalStorage;
+      if (useLocalStorage) {
+          const { useKeys, ignoreKeys, id } = useLocalStorage;
 
       if (useKeys && ignoreKeys) throw Error(
         '\'useKeys\' & \'ignoreKeys\' are'
@@ -69,9 +70,9 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
         if (equal(this.state, lsState)) return;
 
-        this.setState(fromLS);
+          this.setState(fromLS);
       });
-    } else state = initialState;
+      } else state = initialState;
 
     this.setState(state);
   }
@@ -82,8 +83,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
   {
     const newState = { ...this.state };
 
-    objKeyVals(updateState).forEach((o) =>
-      newState[o.key] = o.val as any);
+    objKeyVals(updateState).forEach((o) => newState[o.key] = o.val as any);
 
     const prevState = this.state;
     this.state = newState;
@@ -98,11 +98,10 @@ export class StateManager<State, Key extends keyof State = keyof State>
     const id = uiid();
     this.subscriptions[id] = funct;
 
-    if (fireOnInitSub) funct(this.emittedState, this.emittedState);
+    if (fireOnInitSub && this.emittedState)
+      funct(this.emittedState, this.emittedState2);
 
-    return {
-      unsubscribe: () => delete this.subscriptions[id]
-    };
+    return { unsubscribe: () => delete this.subscriptions[id] };
   }
 
   /** Subscribe only to specific key(s) changes in state */
@@ -130,7 +129,8 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
     this.subscriptions[id] = f;
 
-    if (fireOnInitSub) funct(this.emittedState, this.emittedState);
+    if (fireOnInitSub && this.emittedState)
+      funct(this.emittedState, this.emittedState2);
 
     return { unsubscribe: () => delete this.subscriptions[id] };
   }
@@ -149,6 +149,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
     objVals(this.subscriptions).forEach((f) => f(this.state, prevState));
 
+    this.emittedState2 = this.emittedState;
     this.emittedState = this.state;
   }
 

@@ -24,14 +24,14 @@ export function stateManagerReactLinker<S>(store: StateManager<S>)
         { mapper: (s: S) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
     > {
         state = this.props.mapper(store.getState());
-        subscription: { unsubscribe: () => boolean; } | null = null;
+        sub: { unsubscribe: () => boolean; } | null = null;
 
-        componentDidMount = () => this.subscription = store.subscribe((s) => {
+        componentDidMount = () => this.sub = store.subscribe((s) => {
             const newState = this.props.mapper(s);
             if (!equal(newState, this.state)) this.setState(newState);
-        }, true);
+        });
 
-        componentWillUnmount = () => this.subscription?.unsubscribe();
+        componentWillUnmount = () => this.sub?.unsubscribe();
 
         shouldComponentUpdate = (nextProps: any, nextState: any) =>
             !equal(nextState, this.state)
