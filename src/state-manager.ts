@@ -1,9 +1,8 @@
+import type { Immutable, lsOptions, subFct } from './@types';
 import {
   Dict, Optional, objKeyVals, uiid, wait,
   objVals, equal, objExtract, isType,
 } from '@giveback007/util-lib';
-
-type lsOptions<P> = { id: string, useKeys?: P[], ignoreKeys?: P[] };
 
 const LS_KEY = '-utilStateManager';
 
@@ -11,18 +10,16 @@ export class StateManager<State, Key extends keyof State = keyof State>
 {
   /**
    * emittedState is used to check if an emit is
-   * necessary it is not the same as prevState.
+   * necessary, it is not the same as prevState.
    */
-  private emittedState: State = undefined as any;
-  private emittedState2: State = undefined as any;
-  private state: State = {} as State;
+  private emittedState2: Immutable<State> = undefined as any;
+  private emittedState: Immutable<State> = undefined as any;
+  private state: Immutable<State> = {} as any;
 
   private readonly useLS:
     lsOptions<Key> | false = false;
 
-  private subscriptions: Dict<
-    (s: State, prev: State) => any
-  > = { };
+  private subscriptions: Dict<subFct<State>> = { };
 
   /**
    * The local storage takes an id, this id
@@ -39,39 +36,34 @@ export class StateManager<State, Key extends keyof State = keyof State>
       if (useLocalStorage) {
           const { useKeys, ignoreKeys, id } = useLocalStorage;
 
-      if (useKeys && ignoreKeys) throw Error(
-        '\'useKeys\' & \'ignoreKeys\' are'
-        + ' mutually exclusive, only use one'
-        + ' or the other.'
-      );
+        if (useKeys && ignoreKeys) throw Error(
+          '\'useKeys\' & \'ignoreKeys\' are'
+          + ' mutually exclusive, only use one'
+          + ' or the other.'
+        );
 
-      this.useLS = useLocalStorage;
-      const lsId = this.useLS.id = id + LS_KEY;
+        this.useLS = useLocalStorage;
+        const lsId = this.useLS.id = id + LS_KEY;
 
-      state = {
-        ...initialState,
-        ...this.stateFromLS()
-      };
-
-      addEventListener('storage', (e) => {
-        if (e.key !== lsId) return;
-
-        let fromLS = this.stateFromLS();
-
-        if (useKeys)
-          fromLS = objExtract(fromLS, useKeys)
-        if (ignoreKeys) ignoreKeys
-          .forEach((key) => delete fromLS[key])
-
-        const lsState = {
-          ...this.state,
-          ...fromLS
+        state = {
+          ...initialState,
+          ...this.stateFromLS()
         };
 
-        if (equal(this.state, lsState)) return;
+        addEventListener('storage', (e) => {
+          if (e.key !== lsId) return;
+
+          let fromLS = this.stateFromLS();
+
+          if (useKeys)
+            fromLS = objExtract(fromLS, useKeys);
+          else if (ignoreKeys)
+            ignoreKeys.forEach((key) => delete fromLS[key]);
+
+          if (equal(this.state, { ...this.state, ...fromLS })) return;
 
           this.setState(fromLS);
-      });
+        });
       } else state = initialState;
 
     this.setState(state);
@@ -81,7 +73,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
   setState = async (updateState: Optional<State>) =>
   {
-    const newState = { ...this.state };
+    const newState = { ...this.state } as State;
 
     objKeyVals(updateState).forEach((o) => newState[o.key] = o.val as any);
 
@@ -93,7 +85,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
   }
 
   /** Will execute the given function on state change */
-  subscribe = (funct: (s: State, prev: State) => any, fireOnInitSub = false) =>
+  subscribe = ( funct: subFct<State>, fireOnInitSub = false) =>
   {
     const id = uiid();
     this.subscriptions[id] = funct;
@@ -107,21 +99,21 @@ export class StateManager<State, Key extends keyof State = keyof State>
   /** Subscribe only to specific key(s) changes in state */
   subToKeys = <K extends Key = Key>(
     keys: K[] | K,
-    funct: (s: State, prev: State) => any,
+    funct: subFct<State>,
     fireOnInitSub = false
   ) => {
     if (isType(keys, 'array') && keys.length === 1) keys = keys[0];
 
     const id = uiid();
-    let f: (s: State, prev: State) => any;
+    let f: typeof funct;
 
-    if (isType(keys, 'string')) f = (s: State, prev: State) => {
+    if (isType(keys, 'string')) f = (s, prev) => {
       if (
         !equal(this.emittedState[keys as K], this.state[keys as K])
       ) funct(s, prev);
     }
 
-    else f = (s: State, prev: State) => {
+    else f = (s, prev) => {
       for (const k of keys as K[])
         if (!equal(this.emittedState[k], this.state[k]))
           return funct(s, prev);
@@ -136,9 +128,9 @@ export class StateManager<State, Key extends keyof State = keyof State>
   }
 
   private stateChanged = async (
-    prevState: State
-  ) =>
-  {
+    prevState: Immutable<State>
+  ) => {
+    
     // makes sure to run only after all sync
     // code updates the state
     await wait(0);
@@ -170,7 +162,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
 
     const { id, ignoreKeys, useKeys } = this.useLS;
 
-    let state: State = { ...this.state };
+    let state = { ...this.state } as State;
 
     if (ignoreKeys)
       ignoreKeys.forEach((key) => delete state[key]);
