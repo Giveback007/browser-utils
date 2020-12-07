@@ -1,11 +1,12 @@
-import * as React from "react";
+import * as React from 'react';
 // import type { AnyObj } from "@giveback007/util-lib";
 // import { Dict, isType, uiid } from "@giveback007/util-lib";
 // import type { lsOptions, subFct } from "./@types";
 // import { StateManager } from "./state-manager";
 
-import type { Immutable } from "./@types";
-import type { StateManager } from "./state-manager";
+/* tslint:disable */
+import type { Immutable } from './@types';
+import type { StateManager } from './state-manager';
 
 type P<S, M> = {
     mapper: (s: Immutable<S>) => M,
@@ -26,7 +27,7 @@ export class Applet<S, M> extends React.Component<P<S, M>> {
         super(props);
     }
 
-    // componentDidMount = () => 
+    // componentDidMount = () =>
 
     render = () => <div ref={this.ref} />
 }
@@ -108,7 +109,7 @@ function AppletIoInit<S>(store: StateManager<S>, uiID: string) {
 //         super(initialState, useLocalStorage);
 
 //         this.subToKeys('ui', () => {
-            
+
 //         })
 //     }
 
@@ -129,10 +130,10 @@ function AppletIoInit<S>(store: StateManager<S>, uiID: string) {
 
 //                 if (keys === true) {
 //                     this.uiSubs[id] = fct as any;
-                
+
 //                     if (fireOnInitSub && this.emittedState)
 //                       funct(this.emittedState, this.emittedState2);
-                
+
 //                     return { unsubscribe: () => {
 //                         sub.unsubscribe();
 //                         delete this.uiSubs[id]
@@ -143,24 +144,24 @@ function AppletIoInit<S>(store: StateManager<S>, uiID: string) {
 
 //                 // const id = uiid();
 //                 let f: typeof funct;
-            
+
 //                 if (isType(keys, 'string')) f = (s, prev) => {
 //                     if (
 //                     !equal(this.emittedState[keys as K], this.state[keys as K])
 //                     ) funct(s, prev);
 //                 }
-            
+
 //                 else f = (s, prev) => {
 //                     for (const k of keys as K[])
 //                     if (!equal(this.emittedState[k], this.state[k]))
 //                         return funct(s, prev);
 //                 }
-            
+
 //                 this.subscriptions[id] = f;
-            
+
 //                 if (fireOnInitSub && this.emittedState)
 //                     funct(this.emittedState, this.emittedState2);
-            
+
 //                 return { unsubscribe: () => delete this.subscriptions[id] };
 //             }))
 //         }

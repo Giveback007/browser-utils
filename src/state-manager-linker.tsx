@@ -27,7 +27,7 @@ export function stateManagerReactLinker<S>(store: StateManager<S>)
         state = this.props.mapper(store.getState());
         sub: { unsubscribe: () => boolean; } | null = null;
 
-        componentDidMount = () => this.sub = store.subscribe((s) => {
+        componentDidMount = () => this.sub = store.stateSub((s) => {
             const newState = this.props.mapper(s);
             if (!equal(newState, this.state)) this.setState(newState);
         });
