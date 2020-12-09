@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/Giveback007/browser-utils#readme",
   "dependencies": {
-    "@giveback007/util-lib": "^0.21.0",
+    "@giveback007/util-lib": "^0.22.3",
     "react": "^17.0.1",
     "tslib": "~2.0.3"
   },

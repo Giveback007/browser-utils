@@ -1,7 +1,9 @@
-import type { action as Action, actSubFct, Immutable, lsOptions, stateSubFct } from './@types';
+import type { Dict, Optional } from '@giveback007/util-lib';
+import type {
+  Action, actSubFct, Immutable, lsOptions, stateSubFct
+} from './@types';
 import {
-  Dict, Optional, objKeyVals, uiid, wait,
-  objVals, equal, objExtract, isType, objKeys,
+  objKeyVals, uiid, wait, objVals, equal, objExtract, isType, objKeys,
 } from '@giveback007/util-lib';
 
 const LS_KEY = '-utilStateManager';
