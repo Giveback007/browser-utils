@@ -13,10 +13,12 @@ export class StateManager<State, Key extends keyof State = keyof State>
   /**
    * emittedState is used to check if an emit is
    * necessary it is not the same as prevState.
+   * initialize with {} or else get undefined[key]
+   * errors
    */
-  private emittedState: State = undefined as any;
-  private emittedState2: State = undefined as any;
-  private state: State = {} as State;
+  private emittedState: State   = {} as any;
+  private emittedState2: State  = {} as any;
+  private state: State          = {} as any;
 
   private readonly useLS:
     lsOptions<Key> | false = false;
@@ -33,8 +35,7 @@ export class StateManager<State, Key extends keyof State = keyof State>
   constructor(
     initialState: State,
     useLocalStorage?: lsOptions<Key>
-  )
-  {
+  ) {
       let state = { } as State;
 
       if (useLocalStorage) {
