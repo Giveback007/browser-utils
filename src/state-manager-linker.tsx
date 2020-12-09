@@ -6,16 +6,16 @@ import type { StateManager } from './state-manager';
 /**
  * Links `StateManager` with a react component.
  *
- * ```ts
+ * ```tsx
  * const store = new StateManager(initState);
  * const linker = stateManagerReactLinker(store);
  *
  * class App extends React.Component<{ prop1: Val, prop2: Val }> {}
- * export const AppComponent = linker(s => ({ prop1: s.prop }), App);
+ * export const AppLinked = linker(s => ({ prop1: s.prop }), App);
  *
  * // now it looks like this:
- * <App prop2={someVal} />
- * // prop1 is assigned by stateLinker
+ * <AppLinked prop2={someVal} />
+ * // `prop1` is taken care of by stateLinker.
  * ```
  */
 export function stateManagerReactLinker<S>(store: StateManager<S>)
