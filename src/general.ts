@@ -1,4 +1,5 @@
-import type { Dict } from '@giveback007/util-lib';
+import { Dict, objKeyVals } from '@giveback007/util-lib';
+import type { Url as UrlObj } from './@types';
 
 export const copyToClipboard = (str: string) => navigator.clipboard.writeText(str);
 
@@ -16,7 +17,7 @@ export function elmById(id: string)
 
 // function inspired by this discussion:
 // https://gist.github.com/pirate/9298155edda679510723
-export function getUrlParams(loc: Location = window.location) {
+export function getUrlParams(loc: Location = window.location): UrlObj {
     const { origin, pathname, hash, search } = loc;
     const str = '' + hash ? hash : '' + search ? search : '';
 
@@ -30,3 +31,15 @@ export function getUrlParams(loc: Location = window.location) {
 
     return { origin, pathname, params };
 };
+
+export function urlObjToString(urlObj: UrlObj): string {
+    let str = urlObj.origin + urlObj.pathname;
+    const params = objKeyVals(urlObj.params) as { key: string; val: string; }[];
+
+    if (params.length) {
+        str += '?'
+        params.map(({ key, val }) => str += `&${key}=${val}`);
+    }
+
+    return str;
+}
