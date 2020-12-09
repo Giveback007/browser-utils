@@ -1,6 +1,6 @@
 {
   "name": "@giveback007/browser-utils",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Small browser util function library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/Giveback007/browser-utils#readme",
   "dependencies": {
-    "@giveback007/util-lib": "~0.21.1",
+    "@giveback007/util-lib": "~0.22.3",
     "react": "~17.0.1",
     "tslib": "~2.0.3"
   },

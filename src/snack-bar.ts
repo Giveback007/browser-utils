@@ -1,4 +1,5 @@
-import { isType, AnyObj } from '@giveback007/util-lib';
+import type { AnyObj } from '@giveback007/util-lib';
+import { isType } from '@giveback007/util-lib';
 
 export const snackBar = (item: any, time?: number) =>
 {

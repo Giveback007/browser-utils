@@ -1,7 +1,8 @@
+import type { Optional } from '@giveback007/util-lib';
 import type { ComponentType, FunctionComponent, ComponentClass } from 'react';
-import * as React from 'react';
-import { equal, Optional } from '@giveback007/util-lib';
 import type { StateManager } from './state-manager';
+import * as React from 'react';
+import { equal } from '@giveback007/util-lib';
 
 /**
  * Links `StateManager` with a react component.

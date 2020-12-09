@@ -1,5 +1,6 @@
-import { Dict, objKeyVals } from '@giveback007/util-lib';
-import type { Url as UrlObj } from './@types';
+import type { UrlObj as UrlObj } from './@types';
+import type { Dict } from '@giveback007/util-lib';
+import { objKeyVals } from '@giveback007/util-lib';
 
 export const copyToClipboard = (str: string) => navigator.clipboard.writeText(str);
 

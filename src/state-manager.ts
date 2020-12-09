@@ -1,7 +1,8 @@
+import type { Dict, Optional } from '@giveback007/util-lib';
 import {
-  Dict, Optional, objKeyVals, uiid, wait,
-  objVals, equal, objExtract, isType,
+  objKeyVals, uiid, wait, objVals, equal, objExtract, isType,
 } from '@giveback007/util-lib';
+
 
 type lsOptions<P> = { id: string, useKeys?: P[], ignoreKeys?: P[] };
 
