@@ -5,14 +5,15 @@ export const snackBar = (item: any, time?: number) =>
 {
     const str = isType(item, 'string') ? item : JSON.stringify(item);
 
-    const stylesToString = (obj: AnyObj) => Object.entries(
-        obj).reduce((s, x) => s + `${x[0]}: ${x[1]}; `, '');
+    const stylesToString = (obj: AnyObj) => Object.entries(obj)
+        .reduce((s, x) => s + `${x[0]}: ${x[1]}; `, '');
 
     const body = document.getElementsByTagName('body').item(0);
     if (!body) throw new Error('<body> not found');
 
     let snack = document.getElementById('snack') as HTMLDivElement;
-    let snackText = document.getElementById('snack-text') as HTMLDivElement;
+    let snackText =
+        document.getElementById('snack-text') as HTMLDivElement;
 
     if (snackText) snackText.remove();
     if (snack) snack.remove();
@@ -52,21 +53,19 @@ export const snackBar = (item: any, time?: number) =>
 
     snackText.setAttribute('style', stylesToString(textStyles));
 
-    snackText.innerText = isType(str, 'string') ? str : JSON.stringify(str);
+    snackText.innerText =
+        isType(str, 'string') ? str : JSON.stringify(str);
 
     if (!time) {
         const y = str.length * 120;
         time = y < 4000 ? 4000 : y;
     }
 
-    setTimeout(() => {
-        snackText.setAttribute('style', stylesToString(
-        {
-            ...textStyles,
-            'transition': `all ${time}ms`,
-            'opacity': '0',
-        }));
-    }, 500);
+    setTimeout(() => snackText.setAttribute('style', stylesToString({
+        ...textStyles,
+        'transition': `all ${time}ms`,
+        'opacity': '0',
+    })), 500);
 
     setTimeout(() =>
     {

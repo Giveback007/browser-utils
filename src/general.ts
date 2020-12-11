@@ -2,7 +2,8 @@ import type { UrlObj as UrlObj } from './@types';
 import type { Dict } from '@giveback007/util-lib';
 import { objKeyVals } from '@giveback007/util-lib';
 
-export const copyToClipboard = (str: string) => navigator.clipboard.writeText(str);
+export const copyToClipboard = (str: string) =>
+    navigator.clipboard.writeText(str);
 
 export const viewSize = ({ innerWidth, innerHeight } = window) =>
     ({ width: innerWidth, height: innerHeight });
@@ -25,7 +26,8 @@ export function getUrlParams(url?: string) {
         + search ? search : '';
 
     const hashes = str.slice(str.indexOf('?') + 1).split('&');
-    const params: Dict<string | undefined> = hashes.reduce((obj, x) => {
+    const params: Dict<string | undefined> = hashes.reduce((obj, x) =>
+    {
       const [key, val] = x.split('=');
       if (!key || !val) return obj;
 

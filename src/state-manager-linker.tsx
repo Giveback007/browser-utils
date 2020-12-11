@@ -1,33 +1,33 @@
-import type { Optional } from '@giveback007/util-lib';
 import type { ComponentType, FunctionComponent, ComponentClass } from 'react';
-import type { StateManager } from './state-manager';
 import * as React from 'react';
-import { equal } from '@giveback007/util-lib';
+import { equal, Optional } from '@giveback007/util-lib';
+import type { StateManager } from './state-manager';
+import type { Immutable } from './@types';
 
 /**
  * Links `StateManager` with a react component.
  *
- * ```tsx
+ * ```ts
  * const store = new StateManager(initState);
  * const linker = stateManagerReactLinker(store);
  *
  * class App extends React.Component<{ prop1: Val, prop2: Val }> {}
- * export const AppLinked = linker(s => ({ prop1: s.prop }), App);
+ * export const AppComponent = linker(s => ({ prop1: s.prop }), App);
  *
  * // now it looks like this:
- * <AppLinked prop2={someVal} />
- * // `prop1` is taken care of by stateLinker.
+ * <App prop2={someVal} />
+ * // prop1 is assigned by stateLinker
  * ```
  */
 export function stateManagerReactLinker<S>(store: StateManager<S>)
 {
     class Linker<ChildProps, M, FP> extends React.Component<
-        { mapper: (s: S) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
+        { mapper: (s: Immutable<S>) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
     > {
         state = this.props.mapper(store.getState());
         sub: { unsubscribe: () => boolean; } | null = null;
 
-        componentDidMount = () => this.sub = store.subscribe((s) => {
+        componentDidMount = () => this.sub = store.stateSub((s) => {
             const newState = this.props.mapper(s);
             if (!equal(newState, this.state)) this.setState(newState);
         });
@@ -51,7 +51,7 @@ export function stateManagerReactLinker<S>(store: StateManager<S>)
         C extends ComponentClass<FP, any> | FunctionComponent<FP>,
         M extends Optional<FP>
     // tslint:disable-next-line: variable-name
-    >(mapper: (s: S) => M, Comp: C | ComponentType<FP>) {
+    >(mapper: (s: Immutable<S>) => M, Comp: C | ComponentType<FP>) {
         type Props = Pick<FP, Exclude<keyof FP, keyof M | 'children'>>;
 
         return ((props: Props) => {
