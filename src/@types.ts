@@ -10,10 +10,8 @@ export type Immutable<T> = {
     readonly [K in keyof T]: Immutable<T[K]>;
 };
 
-export type Action<T extends string, D> = Readonly<{
-    type: T,
-    data: D,
-}>;
+export type Action<T extends string, D> =
+    Readonly<{type: T} | { type: T, data: D }>;
 
 export type stateSubFct<S> =
     (s: Immutable<S>, prev: Immutable<S>) => any;

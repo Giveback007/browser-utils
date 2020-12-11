@@ -131,15 +131,14 @@ export class StateManager<
     return { unsubscribe: () => delete this.stateSubDict[id] };
   }
 
-  action<A extends Act>(action: A) {
+  action = <A extends Act>(action: A) =>
     objVals(this.actionSubDict).forEach((f) => f(action));
-  }
 
   /** set `true` if to subscribe to all actions */
-  actionSub<A extends Act>(
+  actionSub = <A extends Act> (
     actions: true | A['type'] | A['type'][],
     fct: actSubFct<A>
-  ) {
+  ) => {
     if (
       isType(actions, 'array')
       &&
@@ -172,7 +171,7 @@ export class StateManager<
    * { type: 'StateManager', destroyed: true }
    * ```
    */
-  destroy() {
+  destroy = () => {
     if (this.useLS)
       localStorage.removeItem(this.useLS.id);
 
