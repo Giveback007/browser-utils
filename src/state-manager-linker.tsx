@@ -2,7 +2,6 @@ import type { ComponentType, FunctionComponent, ComponentClass } from 'react';
 import * as React from 'react';
 import { equal, Optional } from '@giveback007/util-lib';
 import type { StateManager } from './state-manager';
-import type { Immutable } from './@types';
 
 /**
  * Links `StateManager` with a react component.
@@ -22,7 +21,7 @@ import type { Immutable } from './@types';
 export function stateManagerReactLinker<S>(store: StateManager<S>)
 {
     class Linker<ChildProps, M, FP> extends React.Component<
-        { mapper: (s: Immutable<S>) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
+        { mapper: (s: S) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
     > {
         state = this.props.mapper(store.getState());
         sub: { unsubscribe: () => boolean; } | null = null;
@@ -51,7 +50,7 @@ export function stateManagerReactLinker<S>(store: StateManager<S>)
         C extends ComponentClass<FP, any> | FunctionComponent<FP>,
         M extends Optional<FP>
     // tslint:disable-next-line: variable-name
-    >(mapper: (s: Immutable<S>) => M, Comp: C | ComponentType<FP>) {
+    >(mapper: (s: S) => M, Comp: C | ComponentType<FP>) {
         type Props = Pick<FP, Exclude<keyof FP, keyof M | 'children'>>;
 
         return ((props: Props) => {

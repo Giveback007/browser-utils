@@ -1,6 +1,6 @@
 import type { Dict, Optional } from '@giveback007/util-lib';
 import type {
-  Action, actSubFct, Immutable, lsOptions, stateSubFct
+  Action, actSubFct, lsOptions, stateSubFct
 } from './@types';
 import {
   objKeyVals, uiid, wait, objVals, equal, objExtract, isType, objKeys,
@@ -17,9 +17,9 @@ export class StateManager<
    * emittedState is used to check if an emit is
    * necessary, it is not the same as prevState.
    */
-  private emittedState2:  Immutable<State> = { } as any;
-  private emittedState:   Immutable<State> = { } as any;
-  private state:          Immutable<State> = { } as any;
+  private emittedState2:  State = { } as any;
+  private emittedState:   State = { } as any;
+  private state:          State = { } as any;
 
   private readonly useLS:
     lsOptions<Key> | false = false;
@@ -180,9 +180,7 @@ export class StateManager<
     (this as any).destroyed = true;
   }
 
-  private stateChanged = async (
-    prevState: Immutable<State>
-  ) => {
+  private stateChanged = async (prevState: State) => {
     // makes sure to run only after all sync
     // code updates the state
     await wait(0);

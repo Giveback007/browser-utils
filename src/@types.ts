@@ -14,7 +14,7 @@ export type Action<T extends string, D> =
     Readonly<{type: T} | { type: T, data: D }>;
 
 export type stateSubFct<S> =
-    (s: Immutable<S>, prev: Immutable<S>) => any;
+    (s: S, prev: S) => any;
 
 export type actSubFct<A extends Action<any, any>> =
     (a: A) => any;
