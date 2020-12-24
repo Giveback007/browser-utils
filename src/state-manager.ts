@@ -6,26 +6,23 @@ import {
   objKeyVals, uiid, wait, objVals, equal, objExtract, isType, objKeys,
 } from '@giveback007/util-lib';
 
-const LS_KEY = '-utilStateManager';
-
 export class StateManager<
-  State,
+  State extends { },
   Act extends Action<any, any> = Action<any, any>,
-  Key extends keyof State = keyof State
+  Key extends Extract<keyof State, string> = Extract<keyof State, string>
 > {
-  /**
-   * emittedState is used to check if an emit is
-   * necessary, it is not the same as prevState.
-   */
-  private emittedState2:  State = { } as any;
-  private emittedState:   State = { } as any;
-  private state:          State = { } as any;
 
-  private readonly useLS:
-    lsOptions<Key> | false = false;
+  private prevState:    State | null = null;
+  private emittedState: State | null = null;
+  private state:        State;
 
-  private stateSubDict: Dict<stateSubFct<State>> = { };
-  private actionSubDict: Dict<actSubFct<Act>> = { };
+  private readonly useLS: lsOptions<Key> | false = false;
+
+  private stateSubDict:   Dict<stateSubFct<State>>  = { };
+  private actionSubDict:  Dict<actSubFct<Act>>      = { };
+
+  private stateWasUpdated = true;
+  private keysChanged: { [K in Key]?: true } = { };
 
   /**
    * The local storage takes an id, this id
@@ -36,126 +33,112 @@ export class StateManager<
     initialState: State,
     useLocalStorage?: lsOptions<Key>
   ) {
-      let state = { } as State;
+    let state = { } as State;
 
-      if (useLocalStorage) {
-        const { useKeys, ignoreKeys, id } = useLocalStorage;
+    if (useLocalStorage) {
+      const { useKeys, ignoreKeys, id } = useLocalStorage;
 
-        if (useKeys && ignoreKeys) throw Error(
-          '\'useKeys\' & \'ignoreKeys\' are'
-          + ' mutually exclusive, only use one'
-          + ' or the other.'
-        );
+      if (useKeys && ignoreKeys) throw Error(
+        '"useKeys" & "ignoreKeys" are mutually '
+        + 'exclusive, only use one or the other.'
+      );
 
-        this.useLS = useLocalStorage;
-        const lsId = this.useLS.id = id + LS_KEY;
+      this.useLS = useLocalStorage;
+      const lsId = this.useLS.id = id + '-utilStateManager';
 
-        state = {
-          ...initialState,
-          ...this.stateFromLS()
-        };
+      state = {
+        ...initialState,
+        ...this.stateFromLS(),
+      };
 
-        addEventListener('storage', (e) => {
-          if (e.key !== lsId) return;
+      addEventListener('storage', (e: StorageEvent) => {
+        if (e.key !== lsId) return;
 
-          let fromLS = this.stateFromLS();
+        let fromLS = this.stateFromLS();
 
-          if (useKeys)
-            fromLS = objExtract(fromLS, useKeys);
-          else if (ignoreKeys)
-            ignoreKeys.forEach((key) => delete fromLS[key]);
+        if (useKeys)
+          fromLS = objExtract(fromLS, useKeys);
+        else if (ignoreKeys)
+          ignoreKeys.forEach((key) => delete fromLS[key]);
 
-          if (equal(this.state, { ...this.state, ...fromLS })) return;
+        if (equal(this.state, { ...this.state, ...fromLS })) return;
 
-          this.setState(fromLS);
-        });
-      } else state = initialState;
+        this.setState(fromLS);
+      });
+    } else {
+      state = initialState;
+    }
 
+    this.state = state;
     this.setState(state);
   }
 
   getState = () => this.state;
 
   setState = async (updateState: Optional<State>) => {
-    const newState = { ...this.state } as State;
-
     objKeyVals(updateState)
-      .forEach((o) => newState[o.key] = o.val as any);
+      .forEach(({ key, val }) => this.state[key] = val as any);
 
-    const prevState = this.state;
-    this.state = newState;
-    await this.stateChanged(prevState);
-
+    this.stateWasUpdated = true;
+    await this.stateChanged();
     return this.getState();
   }
 
-  /** Will execute the given function on state change */
-  stateSub = (fct: stateSubFct<State>, fireOnInitSub = false) => {
-    const id = uiid();
-    this.stateSubDict[id] = fct;
+  action = <A extends Act = Act>(action: A) =>
+    objVals(this.actionSubDict).forEach((f) => f(action));
 
-    if (fireOnInitSub && this.emittedState)
-      fct(this.emittedState, this.emittedState2);
-
-    return { unsubscribe: () => delete this.stateSubDict[id] };
-  }
-
-  /** Subscribe only to specific key(s) changes in state */
-  keysSub = <K extends Key = Key>(
-    keys: K[] | K,
+  /**
+   * Will execute the given function on state change. Subscribe to
+   * specific key(s) changes in state by setting keys to the desired
+   * key(s) to sub to. Set `keys: true` to sub to all state changes.
+   */
+  stateSub = <K extends Key = Key>(
+    keys: true | K[] | K,
     fct: stateSubFct<State>,
     fireOnInitSub = false
   ) => {
-    if (isType(keys, 'array') && keys.length === 1) keys = keys[0];
+    if (isType(keys, 'array') && keys.length === 1)
+      keys = keys[0];
 
-    const id = uiid();
-    let f: typeof fct;
+    let f = fct;
 
     if (isType(keys, 'string')) f = (s, prev) => {
-      if (
-        !equal(this.emittedState[keys as K], this.state[keys as K])
-      ) fct(s, prev);
+      if (this.keysChanged[keys as K]) return fct(s, prev);
     }
 
-    else f = (s, prev) => {
+    else if (isType(keys, 'array')) f = (s, prev) => {
       for (const k of keys as K[])
-        if (!equal(this.emittedState[k], this.state[k]))
-          return fct(s, prev);
+        if (this.keysChanged[k]) return fct(s, prev);
     }
 
-    this.stateSubDict[id] = f;
+    if (fireOnInitSub && this.emittedState && this.prevState)
+      fct(this.emittedState, this.prevState);
 
-    if (fireOnInitSub && this.emittedState)
-      fct(this.emittedState, this.emittedState2);
-
+    const id = uiid();
+    this.stateSubDict[id] = f as any;
     return { unsubscribe: () => delete this.stateSubDict[id] };
   }
 
-  action = <A extends Act>(action: A) =>
-    objVals(this.actionSubDict).forEach((f) => f(action));
-
   /** set `true` if to subscribe to all actions */
-  actionSub = <A extends Act> (
+  actionSub = <A extends Act = Act> (
     actions: true | A['type'] | A['type'][],
     fct: actSubFct<A>
   ) => {
-    if (
-      isType(actions, 'array')
-      &&
-      actions.length === 1
-    ) actions = actions[0];
+    if (isType(actions, 'array') && actions.length === 1)
+      actions = actions[0];
 
-    const id = uiid();
     let f = fct;
 
-    if (isType(actions, 'string'))
-      f = (a) => a.type === actions ? fct(a) : null;
+    if (isType(actions, 'string')) f = (a) => {
+      if (a.type === actions) return fct(a)
+    }
 
     else if (isType(actions, 'array')) f = (a) => {
       for (const act of actions as A['type'][])
         if (a.type === act) return fct(a);
     }
 
+    const id = uiid();
     this.actionSubDict[id] = f as any;
     return { unsubscribe: () => delete this.actionSubDict[id] };
   }
@@ -180,20 +163,35 @@ export class StateManager<
     (this as any).destroyed = true;
   }
 
-  private stateChanged = async (prevState: State) => {
-    // makes sure to run only after all sync
-    // code updates the state
+  private stateChanged = async () => {
+    // Ensures to run only after all sync code updates the state.
     await wait(0);
+    if (!this.stateWasUpdated) return;
 
-    if (equal(this.emittedState, this.state)) return;
+    let stateDidNotChange = true;
+    for (const k in this.state) {
+      const em = this.emittedState || { } as State;
+      if (!equal(this.state[k], em[k])) {
+        stateDidNotChange = false;
+        this.keysChanged[k as Key] = true;
+      }
+    }
+
+    if (stateDidNotChange)
+      return this.stateWasUpdated = false;
 
     this.updateLocalStorage();
 
     objVals(this.stateSubDict)
-      .forEach((f) => f(this.state, prevState));
+      .forEach((f) => f(this.state, this.prevState as State));
 
-    this.emittedState2 = this.emittedState;
+    this.prevState = this.emittedState;
     this.emittedState = this.state;
+    this.state = { ...this.state }; // Make new obj (or get bugs)!
+
+    this.keysChanged = { };
+    this.stateWasUpdated = false;
+    return true;
   }
 
   private stateFromLS = () => {
@@ -211,7 +209,7 @@ export class StateManager<
 
     const { id, ignoreKeys, useKeys } = this.useLS;
 
-    let state = { ...this.state } as State;
+    let state = { ...this.state };
 
     if (ignoreKeys)
       ignoreKeys.forEach((key) => delete state[key]);
