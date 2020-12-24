@@ -1,9 +1,9 @@
-import type { Dict, Optional } from '@giveback007/util-lib';
+import { Dict, objVals, Optional } from '@giveback007/util-lib';
 import type {
   Action, actSubFct, lsOptions, stateSubFct
 } from './@types';
 import {
-  objKeyVals, uiid, wait, objVals, equal, objExtract, isType, objKeys,
+  uiid, wait, equal, objExtract, isType, objKeys
 } from '@giveback007/util-lib';
 
 export class StateManager<
@@ -24,6 +24,8 @@ export class StateManager<
   private stateWasUpdated = true;
   private keysChanged: { [K in Key]?: true } = { };
 
+  private throttledState: Dict<Optional<State>> = { };
+  private throttlersRunning: Dict<boolean> = { };
   /**
    * The local storage takes an id, this id
    * should be unique in order to ensure that the
@@ -76,16 +78,64 @@ export class StateManager<
   getState = () => this.state;
 
   setState = async (updateState: Optional<State>) => {
-    objKeyVals(updateState)
-      .forEach(({ key, val }) => this.state[key] = val as any);
+    for (const k in updateState)
+      this.state[k] = updateState[k] as any;
 
     this.stateWasUpdated = true;
     await this.stateChanged();
     return this.getState();
   }
 
-  action = <A extends Act = Act>(action: A) =>
-    objVals(this.actionSubDict).forEach((f) => f(action));
+  action = <A extends Act = Act>(action: A) => {
+    for (const k in this.actionSubDict) this.actionSubDict[k](action);
+  }
+
+  // -- State Set Throttler -- //
+  /**
+   * Aggregates state updates by this method over the course of
+   * `msCycle` time and sets the state only once per `msCycle` time.
+   *
+   * Different `msCycle` timings run on separate loops, therefore can
+   * run multiple `msCycle` at the same time.
+   *
+   * To keep state consistent and to prevent bugs, any key run-ins set
+   * in previous `msCycle`(s) will be overwritten by latest
+   * `throttledSetState()` call.
+   *
+   * Will wait the full designated time in `msCycle` on first run.
+   */
+  throttledSetState = async (
+    msCycle: number,
+    updateState: Optional<State>
+  ) => {
+    if (!this.throttledState[msCycle])
+      this.throttledState[msCycle] = { };
+
+    const tsKeys = objKeys(this.throttledState);
+    for (const k in updateState) {
+      this.throttledState[msCycle][k] = updateState[k];
+
+      tsKeys.forEach((tsKey) => // To keep state consistent
+        this.throttledState[tsKey][k] = updateState[k]);
+    }
+
+    this.throttledStateSetter(msCycle);
+  }
+
+  private throttledStateSetter = async (msCycle: number) => {
+    if (this.throttlersRunning[msCycle]) return;
+    this.throttlersRunning[msCycle] = true;
+
+    await wait(msCycle);
+    while (this.throttledState[msCycle]) {
+      this.setState(this.throttledState[msCycle]);
+      delete this.throttledState[msCycle];
+      await wait(msCycle);
+    }
+
+    this.throttlersRunning[msCycle] = false;
+  }
+  // -- State Set Throttler -- //
 
   /**
    * Will execute the given function on state change. Subscribe to
@@ -166,7 +216,7 @@ export class StateManager<
   private stateChanged = async () => {
     // Ensures to run only after all sync code updates the state.
     await wait(0);
-    if (!this.stateWasUpdated) return;
+    if (!this.stateWasUpdated) return false;
 
     let stateDidNotChange = true;
     for (const k in this.state) {
@@ -182,12 +232,12 @@ export class StateManager<
 
     this.updateLocalStorage();
 
-    objVals(this.stateSubDict)
-      .forEach((f) => f(this.state, this.prevState as State));
+    for (const k in this.stateSubDict)
+      this.stateSubDict[k](this.state, this.prevState as State);
 
     this.prevState = this.emittedState;
     this.emittedState = this.state;
-    this.state = { ...this.state }; // Make new obj (or get bugs)!
+    this.state = { ...this.state }; // use obj spread (or get bugs)!
 
     this.keysChanged = { };
     this.stateWasUpdated = false;
