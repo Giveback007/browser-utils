@@ -1,4 +1,4 @@
-import { Dict, objVals, Optional } from '@giveback007/util-lib';
+import type { Dict, Optional } from '@giveback007/util-lib';
 import type {
   Action, actSubFct, lsOptions, stateSubFct
 } from './@types';
@@ -161,8 +161,8 @@ export class StateManager<
         if (this.keysChanged[k]) return fct(s, prev);
     }
 
-    if (fireOnInitSub && this.emittedState && this.prevState)
-      fct(this.emittedState, this.prevState);
+    if (fireOnInitSub)
+      fct(this.emittedState || this.state, this.prevState);
 
     const id = uiid();
     this.stateSubDict[id] = f as any;
