@@ -1,10 +1,10 @@
-import type { Dict, Optional } from '@giveback007/util-lib';
 import type {
   Action, actSubFct, lsOptions, stateSubFct
 } from './@types';
 import {
-  uiid, wait, equal, objExtract, isType, objKeys
+  uiid, wait, equal, objExtract, isType, objKeys, clone
 } from '@giveback007/util-lib';
+import type { Dict, Optional } from '@giveback007/util-lib';
 
 export class StateManager<
   State extends { },
@@ -212,6 +212,9 @@ export class StateManager<
     (this as any).type = 'StateManager';
     (this as any).destroyed = true;
   }
+
+  cloneKey =
+    <K extends Key>(key: K): State[K] => clone(this.state[key]);
 
   private stateChanged = async () => {
     // Ensures to run only after all sync code updates the state.
