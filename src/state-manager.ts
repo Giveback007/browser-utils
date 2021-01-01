@@ -90,11 +90,13 @@ export class StateManager<
     return this.getState();
   }
 
-  action<A extends Act = Act>(action: A | A['type']) {
+  action = <A extends Act = Act>(action: A | A['type']) => {
     if (isType(action, 'string')) action = { type: action } as A;
 
     for (const k in this.actionSubDict)
       this.actionSubDict[k](action);
+
+    return action;
   }
 
   // -- State Set Throttler -- //
