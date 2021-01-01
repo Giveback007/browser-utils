@@ -78,6 +78,10 @@ export class StateManager<
   getState = () => this.state;
 
   setState = async (updateState: Optional<State>) => {
+    // Do this, otherwise you are mutating the value.
+    // (Would make bugs in this case)
+    this.state = { ...this.state };
+
     for (const k in updateState)
       this.state[k] = updateState[k] as any;
 
@@ -86,8 +90,11 @@ export class StateManager<
     return this.getState();
   }
 
-  action = <A extends Act = Act>(action: A) => {
-    for (const k in this.actionSubDict) this.actionSubDict[k](action);
+  action<A extends Act = Act>(action: A | A['type']) {
+    if (isType(action, 'string')) action = { type: action } as A;
+
+    for (const k in this.actionSubDict)
+      this.actionSubDict[k](action);
   }
 
   // -- State Set Throttler -- //
@@ -170,8 +177,11 @@ export class StateManager<
   }
 
   /** set `true` if to subscribe to all actions */
-  actionSub = <A extends Act = Act> (
-    actions: true | A['type'] | A['type'][],
+  actionSub = <
+    T extends Act['type'] = Act['type'],
+    A extends Extract<Act, { type: T }> = Extract<Act, { type: T }>
+  > (
+    actions: true | T | T[],
     fct: actSubFct<A>
   ) => {
     if (isType(actions, 'array') && actions.length === 1)
@@ -180,11 +190,11 @@ export class StateManager<
     let f = fct;
 
     if (isType(actions, 'string')) f = (a) => {
-      if (a.type === actions) return fct(a)
+      if (a.type === actions) return fct(a);
     }
 
     else if (isType(actions, 'array')) f = (a) => {
-      for (const act of actions as A['type'][])
+      for (const act of actions as T['type'][])
         if (a.type === act) return fct(a);
     }
 
@@ -208,7 +218,7 @@ export class StateManager<
     if (this.useLS)
       localStorage.removeItem(this.useLS.id);
 
-    objKeys(this).forEach((k) => delete this[k]);
+    objKeys(this).forEach(k => delete this[k]);
     (this as any).type = 'StateManager';
     (this as any).destroyed = true;
   }
@@ -223,11 +233,14 @@ export class StateManager<
 
     let stateDidNotChange = true;
     for (const k in this.state) {
-      const em = this.emittedState || { } as State;
-      if (!equal(this.state[k], em[k])) {
-        stateDidNotChange = false;
-        this.keysChanged[k as Key] = true;
-      }
+      const em = this.emittedState || { } as Optional<State>;
+
+      if (// only check equality if not already changed.
+        !this.keysChanged[k as Key] && equal(this.state[k], em[k])
+      ) return;
+
+      stateDidNotChange = false;
+      this.keysChanged[k as Key] = true;
     }
 
     if (stateDidNotChange)
