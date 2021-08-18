@@ -206,6 +206,12 @@ export class StateManager<
   }
 
   /**
+   * Allows you to toggle any key with a boolean value true/false.
+   */
+  toggle = (key: Key) =>
+    this.setState({ [key]: (!this.getState()[key]) } as any);
+
+  /**
    * Erases local storage managed by this instance of StateManager,
    * & removes all properties/methods on the object. (This way any
    * attempts of accessing the object should return an error);
