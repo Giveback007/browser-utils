@@ -17,7 +17,7 @@ export function elmById(id: string) {
 
 // function inspired by this discussion:
 // https://gist.github.com/pirate/9298155edda679510723
-export function getUrlParams(url?: string) {
+export function getUrlParams(url?: string): UrlObj {
     const loc = url ? new URL(url) : window.location;
     const { origin, pathname, hash, search } = loc;
 

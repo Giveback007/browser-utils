@@ -2,7 +2,7 @@ import type {
   Action, actSubFct, lsOptions, stateSubFct
 } from './@types';
 import {
-  uiid, wait, equal, objExtract, isType, objKeys, clone
+  uiid, wait, equal, objExtract, isType, objKeys, clone, KeysOfValueType
 } from '@giveback007/util-lib';
 import type { Dict, Optional } from '@giveback007/util-lib';
 
@@ -92,9 +92,10 @@ export class StateManager<
 
   action = <A extends Act = Act>(action: A | A['type']) => {
     if (isType(action, 'string')) action = { type: action } as A;
+    const state = this.getState();
 
     for (const k in this.actionSubDict)
-      this.actionSubDict[k](action);
+      this.actionSubDict[k](action, state);
 
     return action;
   }
@@ -184,20 +185,20 @@ export class StateManager<
     A extends Extract<Act, { type: T }> = Extract<Act, { type: T }>
   > (
     actions: true | T | T[],
-    fct: actSubFct<A>
+    fct: actSubFct<A, State>
   ) => {
     if (isType(actions, 'array') && actions.length === 1)
       actions = actions[0];
 
     let f = fct;
 
-    if (isType(actions, 'string')) f = (a) => {
-      if (a.type === actions) return fct(a);
+    if (isType(actions, 'string')) f = (a, s) => {
+      if (a.type === actions) return fct(a, s);
     }
 
-    else if (isType(actions, 'array')) f = (a) => {
+    else if (isType(actions, 'array')) f = (a, s) => {
       for (const act of actions as T['type'][])
-        if (a.type === act) return fct(a);
+        if (a.type === act) return fct(a, s);
     }
 
     const id = uiid();
@@ -208,8 +209,8 @@ export class StateManager<
   /**
    * Allows you to toggle any key with a boolean value true/false.
    */
-  toggle = (key: Key) =>
-    this.setState({ [key]: (!this.getState()[key]) } as any);
+   toggle = (key: KeysOfValueType<State, boolean>) =>
+   this.setState({ [key]: (!this.getState()[key]) } as any);
 
   /**
    * Erases local storage managed by this instance of StateManager,
@@ -240,16 +241,17 @@ export class StateManager<
     if (!this.stateWasUpdated) return false;
 
     let stateDidNotChange = true;
-    for (const k in this.state) {
-      const em = this.emittedState || { } as Optional<State>;
 
-      if (// only check equality if not already changed.
-        !this.keysChanged[k as Key] && equal(this.state[k], em[k])
-      ) return;
+    objKeys(this.state).forEach((k) => {
+        const em = this.emittedState || { } as Optional<State>;
 
-      stateDidNotChange = false;
-      this.keysChanged[k as Key] = true;
-    }
+        if (// only check equality if not already changed.
+            !this.keysChanged[k as Key] && equal(this.state[k], em[k])
+        ) return;
+
+        stateDidNotChange = false;
+        this.keysChanged[k as Key] = true;
+    });
 
     if (stateDidNotChange)
       return this.stateWasUpdated = false;
