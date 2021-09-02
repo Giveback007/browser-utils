@@ -2,6 +2,7 @@ import type { ComponentType, FunctionComponent, ComponentClass } from 'react';
 import * as React from 'react';
 import { equal, Optional } from '@giveback007/util-lib';
 import type { StateManager } from './state-manager';
+import type { Action } from './@types';
 
 /**
  * Links `StateManager` with a react component.
@@ -18,7 +19,7 @@ import type { StateManager } from './state-manager';
  * // prop1 is assigned by stateLinker
  * ```
  */
-export function stateManagerReactLinker<S>(store: StateManager<S>)
+export function stateManagerReactLinker<S, A extends Action<any, any>>(store: StateManager<S, A>)
 {
     class Linker<ChildProps, M, FP> extends React.Component<
         { mapper: (s: S) => M, Child: ComponentType<FP>, childProps: ChildProps }, M
