@@ -1,6 +1,6 @@
 {
   "name": "@giveback007/browser-utils",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "Small browser util function library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
