@@ -1,6 +1,6 @@
 import type { ComponentType, FunctionComponent, ComponentClass } from 'react';
 import * as React from 'react';
-import { equal, Optional } from '@giveback007/util-lib';
+import { equal } from '@giveback007/util-lib';
 import type { StateManager } from './state-manager';
 import type { Action } from './@types';
 
@@ -49,7 +49,7 @@ export function stateManagerReactLinker<S, A extends Action<any, any>>(store: St
     return function connect<
         FP,
         C extends ComponentClass<FP, any> | FunctionComponent<FP>,
-        M extends Optional<FP>
+        M extends Partial<FP>
     // tslint:disable-next-line: variable-name
     >(mapper: (s: S) => M, Comp: C | ComponentType<FP>) {
         type Props = Pick<FP, Exclude<keyof FP, keyof M | 'children'>>;

@@ -4,7 +4,7 @@ import type {
 import {
   uiid, wait, equal, objExtract, isType, objKeys, clone, KeysOfValueType
 } from '@giveback007/util-lib';
-import type { Dict, Optional } from '@giveback007/util-lib';
+import type { Dict } from '@giveback007/util-lib';
 
 export class StateManager<
   State extends { },
@@ -24,7 +24,7 @@ export class StateManager<
   private stateWasUpdated = true;
   private keysChanged: { [K in Key]?: true } = { };
 
-  private throttledState: Dict<Optional<State>> = { };
+  private throttledState: Dict<Partial<State>> = { };
   private throttlersRunning: Dict<boolean> = { };
   /**
    * The local storage takes an id, this id
@@ -77,7 +77,7 @@ export class StateManager<
 
   getState = () => this.state;
 
-  setState = async (updateState: Optional<State>) => {
+  setState = async (updateState: Partial<State>) => {
     // Do this, otherwise you are mutating the value.
     // (Would make bugs in this case)
     this.state = { ...this.state };
@@ -116,7 +116,7 @@ export class StateManager<
    */
   throttledSetState = async (
     msCycle: number,
-    updateState: Optional<State>
+    updateState: Partial<State>
   ) => {
     if (!this.throttledState[msCycle])
       this.throttledState[msCycle] = { };
@@ -209,8 +209,8 @@ export class StateManager<
   /**
    * Allows you to toggle any key with a boolean value true/false.
    */
-   toggle = (key: KeysOfValueType<State, boolean>) =>
-   this.setState({ [key]: (!this.getState()[key]) } as any);
+  toggle = (key: KeysOfValueType<State, boolean>) =>
+     this.setState({ [key]: (!this.getState()[key]) } as any);
 
   /**
    * Erases local storage managed by this instance of StateManager,
@@ -243,7 +243,7 @@ export class StateManager<
     let stateDidNotChange = true;
 
     objKeys(this.state).forEach((k) => {
-        const em = this.emittedState || { } as Optional<State>;
+        const em = this.emittedState || { } as Partial<State>;
 
         if (// only check equality if not already changed.
             !this.keysChanged[k as Key] && equal(this.state[k], em[k])

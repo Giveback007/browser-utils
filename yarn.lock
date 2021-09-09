@@ -23,10 +23,10 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@giveback007/util-lib@~0.22.5":
-  version "0.22.5"
-  resolved "https://registry.yarnpkg.com/@giveback007/util-lib/-/util-lib-0.22.5.tgz#89b7e706c062af1f2b8682b53959db8502ff53b5"
-  integrity sha512-U5ano03njWPK6O/e8+XhP7e3a0mI/OD01jOOCxrjztl0yst1wsxiYb0K1nXlKoFiFQrvZO+2jVSugrq34eXNKA==
+"@giveback007/util-lib@~0.22.6":
+  version "0.22.6"
+  resolved "https://registry.yarnpkg.com/@giveback007/util-lib/-/util-lib-0.22.6.tgz#f4e2a2087e83abc3c546726e237caff048fabca3"
+  integrity sha512-pEIofEZpcHpHW0AcPqzqeHOQQMS3oN58zv7d8VW4DPaqO1ewumc1uxrILuXPE836WeVumNNxTYTxoS+wQmRPjg==
   dependencies:
     tslib "~2.0.3"
 
@@ -35,10 +35,10 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.4.tgz#fcf7205c25dff795ee79af1e30da2c9790808f11"
   integrity sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==
 
-"@types/react@^17.0.19":
-  version "17.0.19"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.19.tgz#8f2a85e8180a43b57966b237d26a29481dacc991"
-  integrity sha512-sX1HisdB1/ZESixMTGnMxH9TDe8Sk709734fEQZzCV/4lSu9kJCPbo2PbTRoZM+53Pp0P10hYVyReUueGwUi4A==
+"@types/react@^17.0.20":
+  version "17.0.20"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.20.tgz#a4284b184d47975c71658cd69e759b6bd37c3b8c"
+  integrity sha512-wWZrPlihslrPpcKyCSlmIlruakxr57/buQN1RjlIeaaTWDLtJkTtRW429MoQJergvVKc4IWBpRhWw7YNh/7GVA==
   dependencies:
     "@types/prop-types" "*"
     "@types/scheduler" "*"
