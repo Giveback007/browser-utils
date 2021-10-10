@@ -172,7 +172,7 @@ export class StateManager<
     }
 
     if (fireOnInitSub)
-      fct(this.emittedState || this.state, this.prevState);
+      wait(0).then(() => fct(this.state, this.prevState));
 
     const id = uiid();
     this.stateSubDict[id] = f as any;
