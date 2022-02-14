@@ -1,11 +1,11 @@
 {
   "name": "@giveback007/browser-utils",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Small browser util function library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "publish-script": "del dist /s /f /q && npm run lint && npm run build && npm publish",
+    "pub": "del dist /s /f /q && npm run lint && npm run build && npm publish",
     "build": "tsc",
     "lint": "tslint 'src/**/*.{ts,tsx}'"
   },
