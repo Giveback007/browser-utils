@@ -258,12 +258,14 @@ export class StateManager<
 
     this.updateLocalStorage();
 
-    for (const k in this.stateSubDict)
-      this.stateSubDict[k](this.state, this.prevState as State);
-
+    // these 3 need to be set before iterating over subs
+    // else prevState wont be accurately emitted
     this.prevState = this.emittedState;
     this.emittedState = this.state;
     this.state = { ...this.state }; // use obj spread (or get bugs)!
+
+    for (const k in this.stateSubDict)
+      this.stateSubDict[k](this.state, this.prevState as State);
 
     this.keysChanged = { };
     this.stateWasUpdated = false;
